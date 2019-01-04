@@ -349,6 +349,6 @@ function getRandomInt(min, max) {
 (function () {
     let game = new GAME({
         id: 'game',
-        images: [{name: ARKANOID_IMAGE, path: '/images/arkanoid.png'}]
+        images: [{name: ARKANOID_IMAGE, path: 'images/arkanoid.png'}]
     });
 })();
