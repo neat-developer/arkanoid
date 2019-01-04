@@ -115,7 +115,7 @@ function () {
       var newSpeed = this.maxSpeed * 2;
       this.speedY = this.speedY > 0 ? newSpeed : -newSpeed;
       setTimeout(function () {
-        _this2.speedY = _this2.speedY ? _this2.maxSpeed : -_this2.maxSpeed;
+        _this2.speedY = _this2.speedY > 0 ? _this2.maxSpeed : -_this2.maxSpeed;
       }, timeoutBonusConst);
     }
   }, {

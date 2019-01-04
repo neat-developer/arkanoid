@@ -74,7 +74,7 @@ class BALL {
         let newSpeed = this.maxSpeed * 2;
         this.speedY = this.speedY > 0 ? newSpeed : -(newSpeed);
         setTimeout(() => {
-            this.speedY = this.speedY ? this.maxSpeed : -this.maxSpeed;
+            this.speedY = this.speedY > 0 ? this.maxSpeed : -this.maxSpeed;
         }, timeoutBonusConst)
     }
 
