@@ -7,7 +7,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var ARKANOID_IMAGE = 'arkanoid';
-var timeoutBonus = 4000;
+var timeoutBonusConst = 4000;
 
 var GIFT =
 /*#__PURE__*/
@@ -42,9 +42,6 @@ function () {
 var BRICK =
 /*#__PURE__*/
 function () {
-  /**
-   * type - 3,2,1,0
-   */
   function BRICK(x, y, type, w, h) {
     _classCallCheck(this, BRICK);
 
@@ -55,22 +52,18 @@ function () {
     this.h = 32;
     this.collisionW = w;
     this.collisionH = h;
-    this.init();
   }
 
   _createClass(BRICK, [{
-    key: "init",
-    value: function init() {}
-  }, {
     key: "draw",
     value: function draw(ctx, image) {
-      var brickImagePosXByType = {
+      var brickImageByPosXByType = {
         0: 0,
         1: 69,
         2: 138,
         3: 207
       };
-      ctx.drawImage(image, brickImagePosXByType[this.type], 0, this.w, this.h, this.x, this.y, this.collisionW, this.collisionH);
+      ctx.drawImage(image, brickImageByPosXByType[this.type], 0, this.w, this.h, this.x, this.y, this.collisionW, this.collisionH);
     }
   }, {
     key: "stack",
@@ -80,6 +73,77 @@ function () {
   }]);
 
   return BRICK;
+}();
+
+var BALL =
+/*#__PURE__*/
+function () {
+  function BALL(x, y) {
+    _classCallCheck(this, BALL);
+
+    this.x = x;
+    this.y = y;
+    this.maxSpeed = 5;
+    this.canStack = true;
+    this.speedX = 0;
+    this.speedY = 0;
+    this.radius = 55;
+    this.collisionSize = 32;
+  }
+
+  _createClass(BALL, [{
+    key: "draw",
+    value: function draw(ctx, image) {
+      ctx.drawImage(image, 0, 32, this.radius, this.radius, this.x, this.y, this.collisionSize, this.collisionSize);
+    }
+  }, {
+    key: "changeDirection",
+    value: function changeDirection(side) {
+      var _this = this;
+
+      this.canStack = false;
+      this['speed' + side] = -this['speed' + side];
+      setTimeout(function () {
+        _this.canStack = true;
+      });
+    }
+  }, {
+    key: "speedBonus",
+    value: function speedBonus() {
+      var _this2 = this;
+
+      var newSpeed = this.maxSpeed * 2;
+      this.speedY = this.speedY > 0 ? newSpeed : -newSpeed;
+      setTimeout(function () {
+        _this2.speedY = _this2.speedY ? _this2.maxSpeed : -_this2.maxSpeed;
+      }, timeoutBonusConst);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.speedX = 0;
+      this.speedY = 0;
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.speedX = 0;
+      this.speedY = -this.maxSpeed;
+    }
+  }, {
+    key: "setSpeedX",
+    value: function setSpeedX(speed) {
+      this.speedX = speed;
+    }
+  }, {
+    key: "changePosition",
+    value: function changePosition() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+    }
+  }]);
+
+  return BALL;
 }();
 
 var PLATFORM =
@@ -96,7 +160,6 @@ function () {
     this.collisionW = this.defaultCollisionW;
     this.collisionH = this.h * 2;
     this.maxCollisionW = this.collisionW * 2;
-    this.minCollisionW = this.collisionW / 2;
   }
 
   _createClass(PLATFORM, [{
@@ -107,96 +170,16 @@ function () {
   }, {
     key: "bonusPlatformMax",
     value: function bonusPlatformMax() {
-      var _this = this;
+      var _this3 = this;
 
       this.collisionW = this.maxCollisionW;
       setTimeout(function () {
-        _this.collisionW = _this.defaultCollisionW;
-      }, timeoutBonus);
-    }
-  }, {
-    key: "bonusPlatformMin",
-    value: function bonusPlatformMin() {
-      var _this2 = this;
-
-      this.collisionW = this.minCollisionW;
-      setTimeout(function () {
-        _this2.collisionW = _this2.defaultCollisionW;
-      }, timeoutBonus);
+        _this3.collisionW = _this3.defaultCollisionW;
+      }, timeoutBonusConst);
     }
   }]);
 
   return PLATFORM;
-}();
-
-var BALL =
-/*#__PURE__*/
-function () {
-  function BALL(x, y) {
-    _classCallCheck(this, BALL);
-
-    this.x = x;
-    this.y = y;
-    this.maxSpeed = 5;
-    this.canStack = true;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.size = 55;
-    this.collisionSize = 32;
-  }
-
-  _createClass(BALL, [{
-    key: "draw",
-    value: function draw(ctx, image) {
-      ctx.drawImage(image, 0, 32, this.size, this.size, this.x, this.y, this.collisionSize, this.collisionSize);
-    }
-  }, {
-    key: "changeDirection",
-    value: function changeDirection(side) {
-      var _this3 = this;
-
-      this.canStack = false;
-      this['speed' + side] = -this['speed' + side];
-      setTimeout(function () {
-        _this3.canStack = true;
-      });
-    }
-  }, {
-    key: "speedBonus",
-    value: function speedBonus() {
-      var _this4 = this;
-
-      this.speedY = this.speedY > 0 ? this.maxSpeed * 2 : -(this.maxSpeed * 2);
-      setTimeout(function () {
-        _this4.speedY = _this4.speedY > 0 ? _this4.maxSpeed : -_this4.maxSpeed;
-      }, timeoutBonus);
-    }
-  }, {
-    key: "start",
-    value: function start() {
-      this.speedX = 0;
-      this.speedY = -this.maxSpeed;
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      this.speedX = 0;
-      this.speedY = 0;
-    }
-  }, {
-    key: "setSpeedX",
-    value: function setSpeedX(speed) {
-      this['speedX'] = speed;
-    }
-  }, {
-    key: "changePosition",
-    value: function changePosition() {
-      this.x += this['speedX'];
-      this.y += this['speedY'];
-    }
-  }]);
-
-  return BALL;
 }();
 
 var GAME =
@@ -206,109 +189,107 @@ function () {
     _classCallCheck(this, GAME);
 
     this.options = options;
-    this.start = false;
-    this.score = 0;
     this.images = [];
+    this.score = 0;
     this.bricks = [];
     this.gifts = [];
     this.canvas = document.getElementById(this.options.id);
     this.ctx = this.canvas && this.canvas.getContext('2d');
     this.init();
-  }
+  } // GAME METHODS
+
 
   _createClass(GAME, [{
     key: "init",
     value: function init() {
-      var _this5 = this;
+      var _this4 = this;
 
       this.loadImages(this.options.images, function () {
-        _this5.platform = new PLATFORM(0, 0);
-        _this5.platform.x = _this5.canvas.width / 2 - _this5.platform.collisionW / 2;
-        _this5.platform.y = _this5.canvas.height - 20;
-        _this5.ball = new BALL(0, 0);
+        _this4.platform = new PLATFORM(0, 0);
+        _this4.platform.x = _this4.canvas.width / 2 - _this4.platform.collisionW / 2;
+        _this4.platform.y = _this4.canvas.height - 20;
+        _this4.ball = new BALL(0, 0);
 
-        _this5.ballToCenterOfPlatform();
+        _this4.ballToCenterOfPlatform();
 
-        _this5.platformEvents();
+        _this4.setBricks();
 
-        _this5.setBricks();
+        _this4.events();
 
-        _this5.loop();
+        _this4.loop();
       });
-    } // Service methods
-
+    }
   }, {
     key: "loop",
     value: function loop() {
-      var _this6 = this;
+      var _this5 = this;
 
       this.clearCanvas();
-      if (!this.start) this.pressSpaceText(); // BALL
-
+      if (!this.start) this.pressSpaceText();
       var ballPosX = Math.round(this.ball.x + this.ball.speedX);
-      var ballPosY = Math.round(this.ball.y + this.ball.speedY);
+      var ballPosY = Math.round(this.ball.y + this.ball.speedY); //BALL
+
       if (ballPosX + this.ball.collisionSize >= this.canvas.width || ballPosX <= 0) this.ball.changeDirection('X');
       if (ballPosY <= 0) this.ball.changeDirection('Y');
 
       if (ballPosY + this.ball.collisionSize >= this.platform.y && ballPosX + this.ball.collisionSize > this.platform.x && ballPosX <= this.platform.x + this.platform.collisionW && this.start) {
-        var speedBalX = this.ball.maxSpeed * (this.ball.x - (this.platform.x + this.platform.collisionW / 2)) / this.platform.collisionW;
-        this.ball.setSpeedX(speedBalX);
+        var speedBallX = this.ball.maxSpeed * (this.ball.x - (this.platform.x + this.platform.collisionW / 2)) / this.platform.collisionW;
+        this.ball.setSpeedX(speedBallX);
         this.ball.changeDirection('Y');
-      } // BALL
-      // Platform
+      }
 
+      this.ball.changePosition(); // BALL
+      // bricks
 
-      this.platform.draw(this.ctx, this.images[ARKANOID_IMAGE]); // Platform
-      //BRICK
-
-      this.bricks.forEach(function (brick, brickIdx) {
+      this.bricks.forEach(function (brick, idxBrick) {
         if (brick.type >= 0) {
-          if (ballPosX >= brick.x && ballPosX <= brick.x + brick.collisionW && ballPosY <= brick.y + brick.collisionH && ballPosY >= brick.y || ballPosX + _this6.ball.collisionSize >= brick.x && ballPosX + _this6.ball.collisionSize <= brick.x + brick.collisionW && ballPosY <= brick.y + brick.collisionH && ballPosY >= brick.y) {
-            if (_this6.ball.canStack) {
+          if (ballPosX >= brick.x && ballPosX <= brick.x + brick.collisionW && ballPosY <= brick.y + brick.collisionH && ballPosY >= brick.y || ballPosX + _this5.ball.collisionSize >= brick.x && ballPosX + _this5.ball.collisionSize <= brick.x + brick.collisionW && ballPosY <= brick.y + brick.collisionH && ballPosY >= brick.y) {
+            if (_this5.ball.canStack) {
               brick.stack();
               var centerBrickX = brick.x + brick.collisionW / 2;
 
-              var _speedBalX = _this6.ball.maxSpeed * (_this6.ball.x - centerBrickX) / brick.collisionW;
+              var _speedBallX = _this5.ball.maxSpeed * (_this5.ball.x - centerBrickX) / brick.collisionW;
 
-              _this6.ball.setSpeedX(_speedBalX);
+              _this5.ball.setSpeedX(_speedBallX);
 
-              _this6.ball.changeDirection('Y');
+              _this5.ball.changeDirection('Y');
 
-              _this6.score++;
+              _this5.score++;
 
               if (getRandomInt(0, 3) === 3) {
                 var gift = new GIFT(centerBrickX, brick.y + brick.collisionH);
                 gift.x -= gift.collisionW / 2;
 
-                _this6.gifts.push(gift);
+                _this5.gifts.push(gift);
               }
             }
           }
 
-          brick.draw(_this6.ctx, _this6.images[ARKANOID_IMAGE]);
+          brick.draw(_this5.ctx, _this5.images[ARKANOID_IMAGE]);
         } else {
-          delete _this6.bricks[brickIdx];
+          delete _this5.bricks[idxBrick];
         }
-      }); //BRICK
-      //GIFTS
+      }); // bricks
+      // gift
 
       this.gifts.forEach(function (gift, giftIdx) {
-        gift.draw(_this6.ctx, _this6.images[ARKANOID_IMAGE]);
+        gift.draw(_this5.ctx, _this5.images[ARKANOID_IMAGE]);
         gift.move();
 
-        if (gift.y + gift.collisionH >= _this6.platform.y && _this6.start) {
-          if (gift.x >= _this6.platform.x && gift.x <= _this6.platform.x + _this6.platform.collisionW) {
+        if (gift.y + gift.collisionH >= _this5.platform.y && _this5.start) {
+          if (gift.x >= _this5.platform.x && gift.x <= _this5.platform.x + _this5.platform.collisionW && !gift.removed) {
             var randomValue = getRandomInt(0, 1);
-            if (randomValue === 0) _this6.ball.speedBonus();
-            if (randomValue === 1) _this6.platform.bonusPlatformMax(); // if (randomValue === 2) this.platform.bonusPlatformMin();
+            if (randomValue === 0) _this5.ball.speedBonus();
+            if (randomValue === 1) _this5.platform.bonusPlatformMax();
+            gift.removed = true;
           }
 
-          delete _this6.gifts[giftIdx];
+          delete _this5.gifts[giftIdx];
         }
-      });
+      }); // gift
 
       if (ballPosY + this.ball.collisionSize > this.platform.y + this.platform.collisionH) {
-        debugger;
+        // GAMEOVER
         this.start = false;
         this.ball.stop();
         this.ballToCenterOfPlatform();
@@ -320,8 +301,9 @@ function () {
 
       this.setScore();
       this.ball.draw(this.ctx, this.images[ARKANOID_IMAGE]);
+      this.platform.draw(this.ctx, this.images[ARKANOID_IMAGE]);
       window.requestAnimationFrame(function () {
-        _this6.loop();
+        _this5.loop();
       });
     }
   }, {
@@ -343,12 +325,40 @@ function () {
         }
       }
     }
-    /**
-     *
-     * @param images - array
-     * @param callback - callback function
-     */
+  }, {
+    key: "ballToCenterOfPlatform",
+    value: function ballToCenterOfPlatform() {
+      this.ball.x = this.platform.x + this.platform.collisionW / 2 - this.ball.collisionSize / 2;
+      this.ball.y = this.platform.y - this.ball.collisionSize;
+    } //SERVICE METHODS
 
+  }, {
+    key: "clearCanvas",
+    value: function clearCanvas() {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }, {
+    key: "events",
+    value: function events() {
+      var _this6 = this;
+
+      document.addEventListener('mousemove', function (e) {
+        var screenW = screen.width;
+        var xPos = e.screenX;
+        var percentPosX = xPos / screenW * 100;
+        _this6.platform.x = percentPosX * (_this6.canvas.width - _this6.platform.collisionW) / 100;
+        if (!_this6.start) _this6.ballToCenterOfPlatform();
+      });
+      document.addEventListener('keydown', function (e) {
+        var keyCode = e.keyCode;
+
+        if (keyCode === 32 && !_this6.start) {
+          _this6.ball.start();
+
+          _this6.start = true;
+        }
+      });
+    }
   }, {
     key: "loadImages",
     value: function loadImages(images, callback) {
@@ -368,40 +378,6 @@ function () {
       });
       Promise.all(promises).then(function () {
         callback();
-      });
-    }
-  }, {
-    key: "ballToCenterOfPlatform",
-    value: function ballToCenterOfPlatform() {
-      this.ball.x = this.platform.x + this.platform.collisionW / 2 - this.ball.collisionSize / 2;
-      this.ball.y = this.platform.y - this.ball.collisionSize;
-    }
-  }, {
-    key: "clearCanvas",
-    value: function clearCanvas() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    } //     EVENTS METHOD
-
-  }, {
-    key: "platformEvents",
-    value: function platformEvents() {
-      var _this8 = this;
-
-      document.addEventListener('mousemove', function (e) {
-        var screenW = screen.width;
-        var xPos = e.screenX;
-        var percentPosX = xPos / screenW * 100;
-        _this8.platform.x = percentPosX * (_this8.canvas.width - _this8.platform.collisionW) / 100;
-        if (!_this8.start) _this8.ballToCenterOfPlatform();
-      });
-      document.addEventListener('keydown', function (e) {
-        var keycode = e.keyCode;
-
-        if (keycode === 32 && !_this8.start) {
-          _this8.ball.start();
-
-          _this8.start = true;
-        }
       });
     }
   }, {
@@ -434,7 +410,7 @@ function getRandomInt(min, max) {
     id: 'game',
     images: [{
       name: ARKANOID_IMAGE,
-      path: '/images/arkanoid.png'
+      path: 'images/arkanoid.png'
     }]
   });
 })();
